@@ -1,4 +1,5 @@
 """openweathermap_client.py module.
+
 This module provides a client for interacting with the OpenWeatherMap API to retrieve weather information.
 
 Classes:
