@@ -1,1 +1,1 @@
-# noqa: D104
+"""Package for interaction with openweathermap API."""

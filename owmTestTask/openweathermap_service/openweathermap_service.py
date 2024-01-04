@@ -1,4 +1,4 @@
-"""open_weather_map_service.py module.
+"""openweathermap_service.py module.
 
 This module provides a class for interacting with the OpenWeatherMap API and saving weather data.
 
@@ -42,13 +42,13 @@ class OpenWeatherMapService(object):
             Clear the stored weather data.
     """
 
-    def __init__(self):
+    def __init__(self, db):
         """
         Initialize the OpenWeatherMapService.
 
         The results attribute is set to an empty list.
         """
-        self.weathers = []
+        self.db = db
 
     def save_weather(self, response: dict) -> None:
         """
@@ -67,14 +67,14 @@ class OpenWeatherMapService(object):
                         'description': weather['weather'][0]['description'],
                         'temp': str(weather['main']['temp']),
                     }
-                    self.weathers.append(response_dict)
+                    self.db.add_data(response_dict)
         else:
             response_dict = {
                 'name': response['name'],
                 'description': response['weather'][0]['description'],
                 'temp': str(response['main']['temp']),
             }
-            self.weathers.append(response_dict)
+            self.db.add_data(response_dict)
 
     def get_weather(self) -> list:
         """
@@ -83,8 +83,37 @@ class OpenWeatherMapService(object):
         Returns:
             list: A list containing stored weather data.
         """
-        return self.weathers
+        return self.db.db_content
 
     def clear_weather(self) -> None:
         """Clear the stored weather data."""
-        self.weathers = []
+        self.db.clear_data()
+
+
+class DB(object):
+    """Simple class for storing locally data."""
+
+    def __init__(self):
+        """
+        Initialize the OpenWeatherMapService.
+
+        The results attribute is set to an empty list.
+        """
+        self._db_content = []
+
+    def add_data(self, db_content: dict):
+        """Add data to DB."""
+        self._db_content.append(db_content)
+
+    def clear_data(self):
+        """Clear the stored data."""
+        self._db_content = []
+
+    @property
+    def db_content(self) -> list:
+        """Retrieve all data stored in DB.
+
+        Returns:
+            list: A list containing stored data.
+        """
+        return self._db_content
