@@ -1,4 +1,4 @@
-"""openweathermap_client.py module.
+"""client.py module.
 
 This module provides a client for interacting with the OpenWeatherMap API to retrieve weather information.
 Classes:
@@ -17,10 +17,10 @@ Example:
 
 from typing import Any, Dict, Optional
 
-from owmTestTask.services.weatherapi_service import WeatherApiService
+from owmTestTask.openweathermap_client.weather_api import WeatherApi
 
 
-class OpenWeatherMapClient(object):
+class Client(object):
     """
     A client for interacting with the OpenWeatherMap API to retrieve weather information.
 
@@ -35,14 +35,14 @@ class OpenWeatherMapClient(object):
             Get a five-day weather forecast based on latitude and longitude.
     """
 
-    def __init__(self, weather_service: WeatherApiService = None) -> None:
+    def __init__(self, weather_service: WeatherApi = None) -> None:
         """
         Initialize the OpenWeatherMapClient.
 
         Args:
-            weather_service (WeatherApiService): Service for making API requests.
+            weather_service (WeatherApi): Service for making API requests.
         """
-        self.weather_service = weather_service or WeatherApiService()
+        self.weather_service = weather_service
 
     def get_current_weather(self, lat: str, lon: str) -> Optional[Dict[str, Any]]:
         """

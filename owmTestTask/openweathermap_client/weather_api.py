@@ -1,4 +1,4 @@
-"""weatherapi_service.py module.
+"""weather_api.py module.
 
 Module providing a simple wrapper class for interacting with the OpenWeatherMap API.
 
@@ -13,14 +13,14 @@ Example:
     current_weather = client.get_current_weather(lat='48.92', lon='24.71')
     forecast = client.get_five_days_forecast(lat='48.92', lon='24.71')
 """
-import json
 import logging
 from typing import Any, Dict, Optional
-from urllib import parse, request
-from urllib.error import HTTPError
+from urllib.parse import urlencode, urljoin
+
+import requests
 
 
-class WeatherApiService(object):
+class WeatherApi(object):
     """
     A service class for interacting with the OpenWeatherMap API.
 
@@ -41,7 +41,7 @@ class WeatherApiService(object):
     def __init__(
         self,
         api_key: str,
-        endpoint_url: str = 'https://api.openweathermap.org/data/2.5',
+        endpoint_url: str = 'https://api.openweathermap.org/data/2.5/',
         timeout: int = 5,
     ) -> None:
         """
@@ -70,25 +70,31 @@ class WeatherApiService(object):
         Returns:
             Optional[Dict[str, Any]]: The JSON response as a dictionary if the request is successful, otherwise None.
         """
-        url = '{0}/{1}?{2}'.format(
-            self.endpoint_url, endpoint, parse.urlencode({**arguments, 'appid': self.api_key}),
-        )
-        req = request.Request(url, method=method)
+
+        url_with_endpoint = urljoin(self.endpoint_url, endpoint)
+        encoded_params = urlencode({**arguments, 'appid': self.api_key})
+        url = urljoin(url_with_endpoint, '?' + encoded_params)
 
         try:
-            with request.urlopen(req, timeout=self.timeout) as response:
-                data_response = response.read()
-                if response.status == self.status_ok:
-                    return json.loads(data_response.decode('utf-8'))
-                return None
-        except HTTPError as ex:
+            if method.upper() == 'GET':
+                response = requests.get(url, timeout=self.timeout)
+            elif method.upper() == 'POST':
+                response = requests.post(url, timeout=self.timeout)
+            else:
+                raise ValueError("Invalid HTTP method. Use 'GET' or 'POST'.")
+
+            response.raise_for_status()  # Raise an HTTPError for bad responses
+
+            return response.json()
+        except requests.exceptions.RequestException as ex:
             logging.error(
-                'Error occurred while making {0} request to {1}. Status code: {2}, Reason: {3}'.format(
-                    method, url, ex.code, ex.reason,
-                ))
+                f'Error occurred while making {method} request to {url}. '
+                f'Status code: {getattr(ex, "response", None).status_code if hasattr(ex, "response") else None}, '
+                f'Reason: {ex.reason if hasattr(ex, "reason") else None}'
+            )
             return None
         except Exception as ex:
-            logging.error('An unexpected error occurred: {0}'.format(str(ex)))
+            logging.error(f'An unexpected error occurred: {str(ex)}')
             return None
 
     def post_request(

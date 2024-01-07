@@ -21,14 +21,14 @@ The `OpenWeatherMapService` class is a service layer that processes the OpenWeat
 Here is an example of integrating the `OpenWeatherMapClient` and `OpenWeatherMapService`:
 
 ```python
-from owmTestTask.openweathermap_client.openweathermap_client import OpenWeatherMapClient
-from owmTestTask.services.openweathermap_service import OpenWeatherMapService, DB
-from owmTestTask.services.weatherapi_service import WeatherApiService
+from owmTestTask.openweathermap_client.client import Client
+from owmTestTask.service.openweathermap_service import OpenWeatherMapService, DB
+from owmTestTask.openweathermap_client.weather_api import WeatherApi
 
 # Replace 'your_api_key' with your actual OpenWeatherMap API key
 api_key = 'your_api_key'
-weather_service = WeatherApiService(api_key)
-client = OpenWeatherMapClient(weather_service)
+weather_service = WeatherApi(api_key)
+client = Client(weather_service)
 
 # Example: Get current weather
 current_weather = client.get_current_weather(lat='48.92', lon='24.71')
