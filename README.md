@@ -2,9 +2,13 @@
 
 This Python module provides a simple client and service to interact with the OpenWeatherMap API to retrieve current weather and five days forecast data.
 
-## OpenWeatherMapClient
+## OpenWeatherMapClient 
 
-The `OpenWeatherMapClient` class is designed to make HTTP requests to the OpenWeatherMap API. It requires an API key for authentication.
+The `OpenWeatherMapClient` class is provides a client for interacting with the OpenWeatherMap API to retrieve weather information.
+
+##  WeatherApiService
+
+The `WeatherApiService` class is designed to make HTTP requests to the OpenWeatherMap API. It requires an API key for authentication.
 
 
 ## OpenWeatherMapService
@@ -17,26 +21,24 @@ The `OpenWeatherMapService` class is a service layer that processes the OpenWeat
 Here is an example of integrating the `OpenWeatherMapClient` and `OpenWeatherMapService`:
 
 ```python
-from open_weather_map_client import OpenWeatherMapClient
-from open_weather_map_service import OpenWeatherMapService
+from owmTestTask.openweathermap_client.openweathermap_client import OpenWeatherMapClient
+from owmTestTask.services.openweathermap_service import OpenWeatherMapService, DB
+from owmTestTask.services.weatherapi_service import WeatherApiService
 
 # Replace 'your_api_key' with your actual OpenWeatherMap API key
 api_key = 'your_api_key'
-weather_client = OpenWeatherMapClient(api_key)
-weather_service = OpenWeatherMapService()
+weather_service = WeatherApiService(api_key)
+client = OpenWeatherMapClient(weather_service)
 
 # Example: Get current weather
-current_weather = weather_client.get_current_weather(latitude, longitude)
+current_weather = client.get_current_weather(lat='48.92', lon='24.71')
 
 # Example: Save weather data
-weather_service.save_weather(current_weather)
+result_service = OpenWeatherMapService(DB())
+result_service.save_weather(current_weather)
 
 # Example: Get saved weather data
-saved_weather_data = weather_service.get_weather()
-print(saved_weather_data)
-
-# Example: Clear saved weather data
-weather_service.clear_weather()
+print(result_service.get_weather())
 ```
 
 Make sure to replace `'your_api_key'`, `latitude`, and `longitude` with your actual OpenWeatherMap API key and geographical coordinates.

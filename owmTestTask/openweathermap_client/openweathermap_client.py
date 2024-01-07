@@ -8,8 +8,7 @@ Classes:
 
 Example:
     api_key='your_api_key'
-    weather_service = WeatherApiService
-    request_handler = WeatherApiService(api_key)
+    weather_service = WeatherApiService(api_key)
     client = OpenWeatherMapClient(weather_service)
     current_weather = client.get_current_weather(lat='48.92', lon='24.71')
     forecast = client.get_five_days_forecast(lat='48.92', lon='24.71')
@@ -18,7 +17,7 @@ Example:
 
 from typing import Any, Dict, Optional
 
-from owmTestTask.openweathermapapi_service.openweathermapapi_service import WeatherApiService
+from owmTestTask.services.weatherapi_service import WeatherApiService
 
 
 class OpenWeatherMapClient(object):
