@@ -22,6 +22,7 @@ Methods:
     clear_weather() -> None:
         Clear the stored weather data.
 """
+import logging
 
 
 class OpenWeatherMapService(object):
@@ -57,6 +58,10 @@ class OpenWeatherMapService(object):
         Args:
             response (dict): The API response containing weather data.
         """
+        if response is None:
+            logging.error('Error: Response is None.')
+            return
+
         if 'list' in response:
             city_name = response['city']['name']
             for weather in response.get('list'):
@@ -83,11 +88,13 @@ class OpenWeatherMapService(object):
         Returns:
             list: A list containing stored weather data.
         """
-        return self.db.db_content
+        weather_data = self.db.db_content
+
+        if not weather_data:
+            logging.error('Weather data is empty.')
+
+        return weather_data
 
     def clear_weather(self) -> None:
         """Clear the stored weather data."""
         self.db.clear_data()
-
-
-

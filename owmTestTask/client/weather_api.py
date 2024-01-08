@@ -8,10 +8,9 @@ Usage:
 
 Example:
     api_key = 'your_openweathermap_api_key'
-    weather_service = WeatherApiService(api_key)
-    client = OpenWeatherMapClient(weather_service)
-    current_weather = client.get_current_weather(lat='48.92', lon='24.71')
-    forecast = client.get_five_days_forecast(lat='48.92', lon='24.71')
+    weather_handler = WeatherApiService(api_key)
+    client = OpenWeatherMapClient(weather_handler)
+    forecast = client.weather(request_type=RequestType.CURRENT, lat='48.92', lon='24.71')
 """
 import logging
 from typing import Any, Dict, Optional
@@ -20,7 +19,7 @@ from urllib.parse import urlencode, urljoin
 import requests
 
 
-class WeatherApi(object):
+class WeatherApiHandler(object):
     """
     A service class for interacting with the OpenWeatherMap API.
 
@@ -45,7 +44,7 @@ class WeatherApi(object):
         timeout: int = 5,
     ) -> None:
         """
-        Initialize the WeatherApiService.
+        Initialize the WeatherApiHandler.
 
         Args:
             api_key (str): The API key required for authentication.
@@ -55,25 +54,26 @@ class WeatherApi(object):
         self.api_key = api_key
         self.endpoint_url = endpoint_url
         self.timeout = timeout
-        self.status_ok = 200
 
     def send_request(
-        self, endpoint: str, arguments: Dict[str, str], method: str,
+        self,
+        endpoint: str,
+        arguments: Dict[str, str],
+        method: str,
     ) -> Optional[Dict[str, Any]]:
-        """
-        Send an HTTP request to the OpenWeatherMap API.
+        """Send an HTTP request to the OpenWeatherMap API.
 
         Parameters:
             - endpoint (str): The API endpoint to request.
             - arguments (Dict[str, str]): The query parameters for the request.
             - method (str): The HTTP method to use ('GET' or 'POST').
+
         Returns:
             Optional[Dict[str, Any]]: The JSON response as a dictionary if the request is successful, otherwise None.
         """
-
         url_with_endpoint = urljoin(self.endpoint_url, endpoint)
         encoded_params = urlencode({**arguments, 'appid': self.api_key})
-        url = urljoin(url_with_endpoint, '?' + encoded_params)
+        url = urljoin(url_with_endpoint, '?{0}'.format(encoded_params))
 
         try:
             if method.upper() == 'GET':
@@ -82,20 +82,15 @@ class WeatherApi(object):
                 response = requests.post(url, timeout=self.timeout)
             else:
                 raise ValueError("Invalid HTTP method. Use 'GET' or 'POST'.")
-
-            response.raise_for_status()  # Raise an HTTPError for bad responses
-
-            return response.json()
-        except requests.exceptions.RequestException as ex:
+        except requests.exceptions.HTTPError:
             logging.error(
-                f'Error occurred while making {method} request to {url}. '
-                f'Status code: {getattr(ex, "response", None).status_code if hasattr(ex, "response") else None}, '
-                f'Reason: {ex.reason if hasattr(ex, "reason") else None}'
+                'Error occurred while making {0} request to {1}. '.format(method, url),
             )
             return None
         except Exception as ex:
-            logging.error(f'An unexpected error occurred: {str(ex)}')
+            logging.error('An unexpected error occurred: {0}'.format(str(ex)))
             return None
+        return response.json()
 
     def post_request(
         self, endpoint: str, arguments: Dict[str, str],
