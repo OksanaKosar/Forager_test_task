@@ -1,75 +1,74 @@
 """client.py module.
 
-This module provides a client for interacting with the OpenWeatherMap API to retrieve weather information.
+This module contains a Client class that interacts with a weather API using a provided WeatherApiHandler.
 Classes:
 
-    OpenWeatherMapClient:
+    Client:
         A client for interacting with the OpenWeatherMap API.
 
 Example:
     api_key='your_api_key'
     weather_handler = WeatherApiHandler(api_key)
-    client = OpenWeatherMapClient(weather_handler)
-    forecast = client.weather(request_type=RequestType.CURRENT, lat='48.92', lon='24.71')
+    client = OpenWeatherMapClient(lat='48.92', lon='24.71', weather_handler)
+    forecast = client.current_weather
 
 """
-from __future__ import annotations
 
 from typing import Any, Dict, Optional
 
-from owmTestTask.client.request_type_enums import RequestType
 from owmTestTask.client.weather_api import WeatherApiHandler
 
 
 class Client(object):
-    """OpenWeatherMap Client for retrieving weather information using a provided WeatherApiHandler.
+    """
+    Client class for interacting with a weather API using a specified WeatherApiHandler.
 
     Attributes:
+        coordinates (Dict[str, str]): A dictionary containing latitude ('lat') and longitude ('lon').
         weather_handler (WeatherApiHandler): Service for making API requests.
+        current_weather (Optional[Dict[str, Any]]): Current weather information retrieved from the API.
+        five_days_forecast (Optional[Dict[str, Any]]): Five days forecast information retrieved from the API.
 
-    Methods:
-        __init__(self, weather_handler: WeatherApiHandler = None) -> None:
-            Initialize the OpenWeatherMapClient.
-
-            Args:
-                weather_handler (WeatherApiHandler): Service for making API requests.
-
-        weather(self, request_type: RequestType | str, lat: str, lon: str) -> Optional[Dict[str, Any]]:
-            Retrieve weather information for a given location using the specified request type.
-
-            Args:
-                request_type (RequestType | str): The type of weather request, either as a RequestType enum or a string.
-                lat (str): The latitude of the location.
-                lon (str): The longitude of the location.
-
-            Returns:
-                Optional[Dict[str, Any]]: A dictionary containing weather information or None if the request fails.
     """
 
-    def __init__(self, weather_handler: WeatherApiHandler = None) -> None:
-        """
-        Initialize the OpenWeatherMapClient.
+    def __init__(self, lat: str, lon: str, weather_handler: WeatherApiHandler = None) -> None:
+        """Initialize the Client.
 
         Args:
+            lat (str): Latitude.
+            lon (str): Longitude.
             weather_handler (WeatherApiHandler): Service for making API requests.
+
         """
+        self.coordinates = {'lat': lat, 'lon': lon}
         self.weather_handler = weather_handler
+        self.current_weather = self.weather_handler.get_request('weather', self.coordinates)
+        self.five_days_forecast = self.weather_handler.get_request('forecast', self.coordinates)
 
-    def weather(
-        self, request_type: RequestType | str, lat: str, lon: str,
-    ) -> Optional[Dict[str, Any]]:
-        """
-        Retrieve weather information for a given location using the specified request type.
-
-        Args:
-            request_type (RequestType | str): The type of weather request, either as a RequestType enum.
-            lat (str): The latitude of the location.
-            lon (str): The longitude of the location.
+    @property
+    def current_weather(self) -> Optional[Dict[str, Any]]:
+        """Get the current weather information.
 
         Returns:
-            Optional[Dict[str, Any]]: A dictionary containing weather information or None if the request fails.
+            Optional[Dict[str, Any]]: A dictionary containing current weather information.
+
         """
-        coordinates = {'lat': lat, 'lon': lon}
-        if isinstance(request_type, RequestType):
-            request_type = request_type.value
-        return self.weather_handler.get_request(request_type, coordinates)
+        return self._current_weather
+
+    @property
+    def five_days_forecast(self) -> Optional[Dict[str, Any]]:
+        """Get the five days forecast information.
+
+        Returns:
+            Optional[Dict[str, Any]]: A dictionary containing five days forecast information.
+
+        """
+        return self._five_days_forecast
+
+    @current_weather.setter
+    def current_weather(self, value_weather):
+        self._current_weather = value_weather
+
+    @five_days_forecast.setter
+    def five_days_forecast(self, value_weather):
+        self._five_days_forecast = value_weather

@@ -9,8 +9,8 @@ Usage:
 Example:
     api_key = 'your_openweathermap_api_key'
     weather_handler = WeatherApiService(api_key)
-    client = OpenWeatherMapClient(weather_handler)
-    forecast = client.weather(request_type=RequestType.CURRENT, lat='48.92', lon='24.71')
+    client = OpenWeatherMapClient(lat='48.92', lon='24.71', weather_handler)
+    forecast = client.current_weather
 """
 import logging
 from typing import Any, Dict, Optional
@@ -74,22 +74,12 @@ class WeatherApiHandler(object):
         url_with_endpoint = urljoin(self.endpoint_url, endpoint)
         encoded_params = urlencode({**arguments, 'appid': self.api_key})
         url = urljoin(url_with_endpoint, '?{0}'.format(encoded_params))
-
+        response = requests.request(method, url, timeout=self.timeout)
         try:
-            if method.upper() == 'GET':
-                response = requests.get(url, timeout=self.timeout)
-            elif method.upper() == 'POST':
-                response = requests.post(url, timeout=self.timeout)
-            else:
-                raise ValueError("Invalid HTTP method. Use 'GET' or 'POST'.")
-        except requests.exceptions.HTTPError:
-            logging.error(
-                'Error occurred while making {0} request to {1}. '.format(method, url),
-            )
-            return None
-        except Exception as ex:
-            logging.error('An unexpected error occurred: {0}'.format(str(ex)))
-            return None
+            response.raise_for_status()
+        except requests.exceptions.RequestException as ex:
+            logging.error('An error occurred during the request: {0}'.format(str(ex)))
+            raise
         return response.json()
 
     def post_request(
