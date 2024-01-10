@@ -22,23 +22,23 @@ Here is an example of integrating the `OpenWeatherMapClient` and `OpenWeatherMap
 
 ```python
 from owmTestTask.client.client import Client
-from owmTestTask.service.openweathermap_service import OpenWeatherMapService
-from owmTestTask.client.weather_api import WeatherApiHandler
 from owmTestTask.service.db import DB
+from owmTestTask.service.openweathermap_service import OpenWeatherMapService
+from owmTestTask.client.weather_api_handler import WeatherApiHandler
 
 # Replace 'your_api_key' with your actual OpenWeatherMap API key
 api_key = 'your_api_key'
-weather_handler = WeatherApiHandler(api_key)
-client = Client(lat='48.92', lon='24.71', weather_handler = weather_handler)
+weather_handler = WeatherApiHandler(api_key=api_key, endpoint="weather", lat='48.92', lon='24.71')
+client = Client(api_handler=weather_handler)
 
 # Example: Get current weather
-forecast = client.current_weather
-# Example: Save weather data
+weather = client.request
 result_service = OpenWeatherMapService(DB())
-result_service.save_weather(forecast)
-
+# Example: Save weather data
+result_service.save_weather(weather)
 # Example: Get saved weather data
 print(result_service.get_weather())
+
 ```
 
 Make sure to replace `'your_api_key'`, `latitude`, and `longitude` with your actual OpenWeatherMap API key and geographical coordinates.
