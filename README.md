@@ -2,9 +2,9 @@
 
 This Python module provides a simple client and service to interact with the OpenWeatherMap API to retrieve current weather and five days forecast data.
 
-## OpenWeatherMapClient 
+## WeatherClient 
 
-The `OpenWeatherMapClient` class is provides a client for interacting with the OpenWeatherMap API to retrieve weather information.
+The `WeatherClient` class is provides a client for interacting with the OpenWeatherMap API to retrieve weather information.
 
 ##  WeatherApiHandler
 
@@ -18,30 +18,27 @@ The `OpenWeatherMapService` class is a service layer that processes the OpenWeat
 
 ## Example Integration
 
-Here is an example of integrating the `OpenWeatherMapClient` and `OpenWeatherMapService`:
+Here is an example of integrating the `WeatherClient` and `OpenWeatherMapService`:
 
 ```python
-from owmTestTask.client.client import Client
+from owmTestTask.client.weather_client import WeatherClient
 from owmTestTask.service.db import DB
 from owmTestTask.service.openweathermap_service import OpenWeatherMapService
-from owmTestTask.client.weather_api_handler import WeatherApiHandler
 
 # Replace 'your_api_key' with your actual OpenWeatherMap API key
 api_key = 'your_api_key'
-weather_handler = WeatherApiHandler(api_key=api_key, endpoint="weather", lat='48.92', lon='24.71')
-client = Client(api_handler=weather_handler)
-
-# Example: Get current weather
-weather = client.request
-result_service = OpenWeatherMapService(DB())
+client = WeatherClient(api_key=api_key)
+# Example: Get current weather for 'Kharkiv'
+weather = client.weather_handler.get_weather_for_city('Kharkiv')
 # Example: Save weather data
+result_service = OpenWeatherMapService(DB())
 result_service.save_weather(weather)
 # Example: Get saved weather data
 print(result_service.get_weather())
 
 ```
 
-Make sure to replace `'your_api_key'`, `latitude`, and `longitude` with your actual OpenWeatherMap API key and geographical coordinates.
+Make sure to replace `'your_api_key'` with your actual OpenWeatherMap API key .
 
 Feel free to explore and customize the provided classes based on your application's requirements.
 
